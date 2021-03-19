@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import Highcharts from 'highcharts/highmaps';
 import DrillDown from 'highcharts/modules/drilldown';
-import usMap from '@highcharts/map-collection/countries/us/us-all.geo.json';
+import usMap from '../../assets/us/us-all.geo.json';
+import { AppService } from '../../services/app.service';
 DrillDown(Highcharts);
 
 declare var require: any;
@@ -12,6 +13,7 @@ declare var require: any;
   styleUrls: ['./highchartdemo.component.scss'],
 })
 export class HighchartdemoComponent implements OnInit {
+  component = this;
   Highcharts: typeof Highcharts = Highcharts;
   usMapData = Highcharts.geojson(usMap);
   // - 'mapChart' for Highcharts Maps
@@ -20,28 +22,28 @@ export class HighchartdemoComponent implements OnInit {
   chartOptions: Highcharts.Options = {
     chart: {
       events: {
-        drilldown(e: any) {
-          const chart = this as any;
+        drilldown: (e: any) => {
+          const chart = e.target as any;
+          this.service
+            .getUSMapCountiesJson(e.point.drilldown)
+            .subscribe((jsonData: any) => {
+              const provinceData = Highcharts.geojson(jsonData);
 
-          const mapKey = 'countries/us/' + e.point.drilldown + '-all';
-          const mapData = require(`@highcharts/map-collection/${mapKey}.geo.json`);
+              provinceData.forEach((el: any, i) => {
+                el.value = i;
+              });
 
-          const provinceData = Highcharts.geojson(mapData);
-          // Set a random value on map
-          provinceData.forEach((el: any, i) => {
-            el.value = i;
-          });
+              chart.addSeriesAsDrilldown(e.point, {
+                name: e.point.name,
+                data: provinceData,
 
-          chart.addSeriesAsDrilldown(e.point, {
-            name: e.point.name,
-            data: provinceData,
+                dataLabels: {
+                  enabled: true,
+                },
+              } as any);
 
-            dataLabels: {
-              enabled: true,
-            },
-          });
-
-          chart.setTitle(null, { text: e.point.name });
+              chart.setTitle(null, { text: e.point.name });
+            });
         },
         drillup() {
           const chart = this as any;
@@ -81,7 +83,9 @@ export class HighchartdemoComponent implements OnInit {
     ],
     drilldown: {},
   };
-  constructor() {}
+
+  constructor(private service: AppService) {}
+
   ngOnInit(): void {
     this.usMapData.forEach((el: any, i) => {
       el.value = i;
