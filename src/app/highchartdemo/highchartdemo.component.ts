@@ -24,25 +24,35 @@ export class HighchartdemoComponent implements OnInit {
       events: {
         drilldown: (e: any) => {
           const chart = e.target as any;
+          chart.showLoading('Loading Province Data');
           this.service
             .getUSMapCountiesJson(e.point.drilldown)
             .subscribe((jsonData: any) => {
               const provinceData = Highcharts.geojson(jsonData);
 
               provinceData.forEach((el: any, i) => {
-                el.value = i;
-              });
+                el.value = el.name;
 
+                console.log(el);
+              });
+              chart.hideLoading();
               chart.addSeriesAsDrilldown(e.point, {
                 name: e.point.name,
                 data: provinceData,
-
+                fillColor: 'red',
+                // title: 'Som',
                 dataLabels: {
                   enabled: true,
+                  backgroundColor: 'white',
+                  color: 'black',
+                } as Highcharts.PlotMapDataLabelsOptions,
+                tooltip: {
+                  headerFormat: '',
+                  pointFormat: '<b>{point.name}</b> [{series.name}]',
                 },
-              } as any);
+              } as Highcharts.SeriesOptionsType);
 
-              chart.setTitle(null, { text: e.point.name });
+              chart.setTitle(e.point.name, { text: e.point.name });
             });
         },
         drillup() {
@@ -58,7 +68,6 @@ export class HighchartdemoComponent implements OnInit {
       minColor: '#E6E7E8',
       maxColor: '#417BCC',
     },
-
     mapNavigation: {
       enabled: true,
       buttonOptions: {
@@ -79,6 +88,20 @@ export class HighchartdemoComponent implements OnInit {
         type: 'map',
         name: 'US',
         data: this.usMapData as any,
+        // data: [['us-wa', 1]] as any,
+        // dataLabels: {
+        // enabled: true,
+        // color: '#dedede',
+        // formatter: function () {
+        // if (this.point.value) {
+        // return this.point.name;
+        // }
+        // },
+        // },
+        tooltip: {
+          headerFormat: '',
+          pointFormat: '{point.name}',
+        },
       },
     ],
     drilldown: {},
