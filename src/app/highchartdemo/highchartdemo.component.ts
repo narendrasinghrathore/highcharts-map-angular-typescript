@@ -32,18 +32,14 @@ export class HighchartdemoComponent implements OnInit {
 
               provinceData.forEach((el: any, i) => {
                 el.value = el.name;
-
-                console.log(el);
+                el.color = '#fefefe';
               });
               chart.hideLoading();
               chart.addSeriesAsDrilldown(e.point, {
                 name: e.point.name,
                 data: provinceData,
-                fillColor: 'red',
-                // title: 'Som',
                 dataLabels: {
                   enabled: true,
-                  backgroundColor: 'white',
                   color: 'black',
                 } as Highcharts.PlotMapDataLabelsOptions,
                 tooltip: {
@@ -63,11 +59,11 @@ export class HighchartdemoComponent implements OnInit {
     title: {
       text: '',
     },
-    colorAxis: {
-      min: 0,
-      minColor: '#E6E7E8',
-      maxColor: '#417BCC',
-    },
+    // colorAxis: {
+    //   min: 0,
+    //   minColor: '#E6E7E8',
+    //   maxColor: '#417BCC',
+    // },
     mapNavigation: {
       enabled: true,
       buttonOptions: {
@@ -78,7 +74,7 @@ export class HighchartdemoComponent implements OnInit {
       map: {
         states: {
           hover: {
-            color: '#F8BA03',
+            color: '#dedede',
           },
         },
       },
@@ -88,6 +84,15 @@ export class HighchartdemoComponent implements OnInit {
         type: 'map',
         name: 'US',
         data: this.usMapData as any,
+        states: {
+          hover: {
+            color: '#BADA55',
+          },
+        },
+        dataLabels: {
+          enabled: true,
+          format: '{point.name}',
+        },
         // data: [['us-wa', 1]] as any,
         // dataLabels: {
         // enabled: true,
