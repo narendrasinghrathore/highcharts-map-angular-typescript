@@ -6,7 +6,6 @@ import { AppService } from '../../services/app.service';
 DrillDown(Highcharts);
 
 declare var require: any;
-
 @Component({
   selector: 'app-highchartdemo',
   templateUrl: './highchartdemo.component.html',
@@ -18,6 +17,97 @@ export class HighchartdemoComponent implements OnInit {
   usMapData = Highcharts.geojson(usMap);
   // - 'mapChart' for Highcharts Maps
   chartConstructor = 'mapChart';
+
+  readonly selectedCountyColor = '#008000';
+
+  readonly defaultCountyColor = '#fefefe';
+
+  preSelectedCounties = [
+    'us-az-011',
+    'us-az-009',
+    'us-az-023',
+    'us-wa-055',
+    'us-wa-019',
+    'us-wa-021',
+    'us-wa-001',
+    'us-wa-003',
+    'us-wa-035',
+    'us-wa-045',
+    'us-wa-041',
+    'us-ks-093',
+    'us-ks-171',
+    'us-ks-177',
+    'us-ks-187',
+    'us-ks-189',
+    'us-ks-031',
+    'us-ks-059',
+    'us-ks-207',
+    'us-ks-139',
+    'us-ks-183',
+    'us-tx-415',
+    'us-tx-373',
+    'us-tx-291',
+    'us-tx-433',
+    'us-tx-089',
+    'us-tx-135',
+    'us-tx-497',
+    'us-tx-097',
+    'us-tx-245',
+    'us-tx-227',
+    'us-tx-387',
+    'us-tx-431',
+    'us-tx-335',
+    'us-ak-105',
+    'us-ak-130',
+    'us-ak-220',
+    'us-ak-290',
+    'us-ak-068',
+    'us-ak-170',
+    'us-ak-198',
+    'us-ak-195',
+    'us-ak-275',
+    'us-ak-110',
+  ];
+
+  isCountyPreSelected(countyHcKeyName: string) {
+    if (!countyHcKeyName) return undefined;
+    return this.preSelectedCounties.find(
+      (key: string) =>
+        key && key.toLowerCase() === countyHcKeyName.toLowerCase()
+    );
+  }
+
+  getColor(key: string) {
+    if (!key) return this.defaultCountyColor;
+    return this.isCountyPreSelected(key)
+      ? this.selectedCountyColor
+      : this.defaultCountyColor;
+  }
+
+  selectCounty(countyHCKeyName: string) {
+    if (!countyHCKeyName) return;
+    this.preSelectedCounties = [...this.preSelectedCounties, countyHCKeyName];
+  }
+
+  unselectCounty(countyHCKeyName: string) {
+    this.preSelectedCounties = this.preSelectedCounties.filter(
+      (county) => county !== countyHCKeyName
+    );
+  }
+
+  addOrRemoveCounty(
+    countyHCKeyName: string,
+    callBack: (value: boolean) => void
+  ) {
+    const county = this.isCountyPreSelected(countyHCKeyName);
+    if (county) {
+      this.unselectCounty(countyHCKeyName);
+      callBack(false); // when removed
+    } else {
+      this.selectCounty(countyHCKeyName);
+      callBack(true); // when added
+    }
+  }
 
   chartOptions: Highcharts.Options = {
     chart: {
@@ -32,7 +122,8 @@ export class HighchartdemoComponent implements OnInit {
 
               provinceData.forEach((el: any, i) => {
                 el.value = el.name;
-                el.color = '#fefefe';
+                //el.properties['hc-key']
+                el.color = this.getColor(el.properties['hc-key']);
               });
               chart.hideLoading();
               chart.addSeriesAsDrilldown(e.point, {
@@ -45,6 +136,14 @@ export class HighchartdemoComponent implements OnInit {
                 tooltip: {
                   headerFormat: '',
                   pointFormat: '<b>{point.name}</b> [{series.name}]',
+                },
+                events: {
+                  click: (e: any) => {
+                    const countyKey = e.point.properties['hc-key'];
+                    this.addOrRemoveCounty(countyKey, (isAdded) => {
+                      e.point.color = this.getColor(countyKey);
+                    });
+                  },
                 },
               } as Highcharts.SeriesOptionsType);
 
