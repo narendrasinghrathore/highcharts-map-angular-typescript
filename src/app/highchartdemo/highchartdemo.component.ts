@@ -219,4 +219,8 @@ export class HighchartdemoComponent implements OnInit {
       el.drilldown = el.properties['hc-key'];
     });
   }
+
+  get selectedCounties() {
+    return this.preSelectedCounties.join(', ');
+  }
 }
